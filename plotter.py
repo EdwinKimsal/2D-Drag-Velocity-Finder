@@ -2,22 +2,23 @@ import math
 import matplotlib.pyplot as plt
 
 # Variables
-FINAL_X = 1.432 # Meters
+FINAL_X = 2.432 # Meters
 FINAL_Y = .1209 # Meters
 ANGLE = math.radians(45) # Radians
 
 # Constants
 MASS = 0.040 # Kilograms
-BALL_RADIUS = 0.002 # Meters
+BALL_RADIUS = 0.02 # Meters
 AIR_DENSITY = 1.225 # kg/m^3
-DRAG_COEF = 0.40
+DRAG_COEF = 0.50
 GRAVITY = 9.81 # m/s^2
 TIME_DIFF = 0.005 # Difference in points
 DELTA_GOAL = 0.01
 DIFF_FACTOR = 0.75
+MAX_ITER = 100
 
-area = 2 * math.pi * BALL_RADIUS
-terminal_velocity = math.sqrt((2* MASS * GRAVITY) / (area * AIR_DENSITY * DRAG_COEF))
+area = math.pi * BALL_RADIUS**2
+terminal_velocity = math.sqrt((2 * MASS * GRAVITY) / (area * AIR_DENSITY * DRAG_COEF))
 init_vel = (FINAL_X / math.cos(ANGLE)) * math.sqrt(GRAVITY / (2 * (FINAL_X * math.tan(ANGLE) - FINAL_Y)))
 
 
@@ -35,7 +36,7 @@ def get_point_air(time, v0_x, v0_y):
         del_y = (terminal_velocity**2 / GRAVITY) * math.log((math.cos(math.atan(v0_y / terminal_velocity) - (GRAVITY / terminal_velocity) * time)) / (math.cos(math.atan(v0_y / terminal_velocity))))
     
     except ValueError:
-        del_y = (terminal_velocity**2 / GRAVITY) * math.log((math.cosh(math.atanh(v0_y / terminal_velocity) + (GRAVITY / terminal_velocity) * time)) / (math.cosh(math.atan(v0_y / terminal_velocity))))
+        del_y = (terminal_velocity**2 / GRAVITY) * math.log((math.cosh(math.atanh(v0_y / terminal_velocity) + (GRAVITY / terminal_velocity) * time)) / (math.cosh(math.atanh(v0_y / terminal_velocity))))
 
     return {"del_x": del_x, "del_y": del_y}
 
@@ -111,13 +112,14 @@ def main():
         "dist": math.inf
     }
 
-    while abs(shot_info["dist"]) > DELTA_GOAL:
-        # Plot the ideal scenario path
-        find_reg(True)
-        
-        # Find the air resistance path and update shot
+    # Plot the ideal scenario path
+    find_reg(True)
+    
+    for _ in range(MAX_ITER):
         shot_info = find_air(shot_info["vel"])
         shot_info = update_shot(shot_info)
+        if abs(shot_info["dist"]) <= DELTA_GOAL:
+            break
 
     # Plot the air resistance path
     find_air(shot_info["vel"], True)
