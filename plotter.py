@@ -2,8 +2,8 @@ import math
 import matplotlib.pyplot as plt
 
 # Variables
-FINAL_X = 5 # Meters
-FINAL_Y = .5 # Meters
+FINAL_X = 1.432 # Meters
+FINAL_Y = .1209 # Meters
 ANGLE = math.radians(45) # Radians
 
 # Constants
@@ -12,9 +12,9 @@ BALL_RADIUS = 0.002 # Meters
 AIR_DENSITY = 1.225 # kg/m^3
 DRAG_COEF = 0.40
 GRAVITY = 9.81 # m/s^2
-TIME_DIFF = 0.010 # Difference in points
-DELTA_GOAL = 0.001
-DIFF_FACTOR = 0.25
+TIME_DIFF = 0.005 # Difference in points
+DELTA_GOAL = 0.01
+DIFF_FACTOR = 0.75
 
 area = 2 * math.pi * BALL_RADIUS
 terminal_velocity = math.sqrt((2* MASS * GRAVITY) / (area * AIR_DENSITY * DRAG_COEF))
@@ -41,12 +41,10 @@ def get_point_air(time, v0_x, v0_y):
 
 
 
-def plot_reg():
+def find_reg(plot=False):
     # Init function vars
     curr_x = 0
     curr_y = 0
-    prev_x = 0
-    prev_y = 0
     time = 0
 
     # Find needed vars
@@ -59,16 +57,17 @@ def plot_reg():
 
         curr_x = points["del_x"]
         curr_y = points["del_y"]
-        plt.scatter(curr_x, curr_y, color="lime")
+
+        if (plot):
+            plt.scatter(curr_x, curr_y, color="lime")
 
         if curr_x >= FINAL_X:
-            plt.scatter(curr_x, curr_y, color="lime")
             break
 
         time += TIME_DIFF
 
 
-def plot_air(vel):
+def find_air(vel, plot=False):
     # Init function vars
     curr_x = 0
     curr_y = 0
@@ -84,10 +83,11 @@ def plot_air(vel):
 
         curr_x = points["del_x"]
         curr_y = points["del_y"]
-        plt.scatter(curr_x, curr_y, color="blue")
+
+        if (plot):
+            plt.scatter(curr_x, curr_y, color="blue")
 
         if curr_x >= FINAL_X:
-            plt.scatter(curr_x, curr_y, color="blue")
             break
 
         time += TIME_DIFF
@@ -113,21 +113,23 @@ def main():
 
     while abs(shot_info["dist"]) > DELTA_GOAL:
         # Plot the ideal scenario path
-        plot_reg()
+        find_reg(True)
         
-        # Plot the air resistance path
-        shot_info = plot_air(shot_info["vel"])
-
-        # Plot the goal
-        plt.scatter(FINAL_X, FINAL_Y, color="red")
-
-        # Initialize graph and show it  
-        plt.title("Path Traveled")
-        plt.xlabel("X Distance")
-        plt.ylabel("Y Distance")
-        plt.show()
-
+        # Find the air resistance path and update shot
+        shot_info = find_air(shot_info["vel"])
         shot_info = update_shot(shot_info)
+
+    # Plot the air resistance path
+    find_air(shot_info["vel"], True)
+
+    # Plot the goal
+    plt.scatter(FINAL_X, FINAL_Y, color="red")
+
+    # Initialize graph and show it  
+    plt.title("Path Traveled")
+    plt.xlabel("X Distance")
+    plt.ylabel("Y Distance")
+    plt.show()
 
 
 main()
