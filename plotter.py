@@ -1,9 +1,9 @@
-import math
+﻿import math
 import matplotlib.pyplot as plt
 
 # Variables
-FINAL_X = 2.432 # Meters
-FINAL_Y = .4209 # Meters
+FINAL_X = 1.532 # Meters
+FINAL_Y = .209 # Meters
 ANGLE = math.radians(45) # Radians
 
 # Constants
@@ -15,7 +15,7 @@ GRAVITY = 9.81 # m/s^2
 TIME_DIFF = 0.005 # Difference in points
 DELTA_GOAL = 0.01
 DIFF_FACTOR = 0.75
-MAX_ITER = 100
+MAX_ITER = 200
 
 area = math.pi * BALL_RADIUS**2
 drag_factor = (0.5 * AIR_DENSITY * DRAG_COEF * area) / MASS
@@ -34,9 +34,12 @@ def get_drag_path_info(vel, plot=False, color="blue", label=None):
     vel_y = vel * math.sin(ANGLE)
     
     while ((pos_y >= 0 or pos_y >= FINAL_Y) and pos_x < FINAL_X):
+        # Update speed
+        speed = math.sqrt(vel_x**2 + vel_y**2)
+
         # Calculate accelerations
-        acc_x = -drag_factor * vel * vel_x
-        acc_y = -GRAVITY - drag_factor * vel * vel_y
+        acc_x = -drag_factor * speed * vel_x
+        acc_y = -GRAVITY - drag_factor * speed * vel_y
 
         # Update velocities
         vel_x =  vel_x + (acc_x * TIME_DIFF)
@@ -117,6 +120,7 @@ def main():
 
     # Plot the air resistance path
     get_drag_path_info(vel, True, "blue", "Quadratic drag")
+    print("Launch Velocity: " + str(vel))
 
     # Plot the goal
     plt.scatter(FINAL_X, FINAL_Y, color="red", label="Target")
